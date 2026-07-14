@@ -8,6 +8,27 @@ export default function Dashboard({ apiKey }) {
   const [history, setHistory] = useState([]);
   const [activeSubTab, setActiveSubTab] = useState("flags");
 
+  // Helper to map and extract signals dynamically
+  const getGroupedChecks = (res) => {
+    if (!res) return { security: [], company: [], reputation: [] };
+    
+    const security = res.signals 
+      ? res.signals.filter(s => ["domain name", "https", "domain age", "technical"].some(k => s.label.toLowerCase().includes(k)))
+      : (res.securityChecks || []);
+
+    const company = res.signals
+      ? res.signals.filter(s => ["ownership", "content", "contact", "claims"].some(k => s.label.toLowerCase().includes(k)))
+      : (res.companyChecks || []);
+
+    const reputation = res.signals
+      ? res.signals.filter(s => ["reviews", "policies"].some(k => s.label.toLowerCase().includes(k)))
+      : (res.reputationChecks || []);
+
+    return { security, company, reputation };
+  };
+
+  const { security: currentSecurityChecks, company: currentCompanyChecks, reputation: currentReputationChecks } = getGroupedChecks(result);
+
   // Sample quick tests to showcase the engine
   const sampleUrls = [
     { label: "Legitimate (TCS)", url: "https://www.tcs.com/careers" },
@@ -318,6 +339,42 @@ ${result.explanation}
               </div>
             </div>
 
+            {/* Verdict Table (Prominent tabular safety verdict) */}
+            <div className="bg-[#0a0b10]/80 border border-[#1f2235] rounded-xl p-5 shadow-inner">
+              <h4 className="text-sm font-bold text-gray-200 uppercase tracking-widest mb-3 flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${result.trustScore >= 8 ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)]' : 'bg-rose-500 shadow-[0_0_8px_rgba(239,68,68,0.7)]'}`}></span>
+                {result.trustScore >= 8 ? "Legitimate Verdict Table" : "Suspicious Verdict Table"}
+              </h4>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-[#1f2235] bg-[#121420]/60">
+                      <th className="p-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Check Parameter</th>
+                      <th className="p-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Verdict</th>
+                      <th className="p-3 text-xs font-bold text-gray-400 uppercase tracking-wider">Detailed Value</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#1f2235]">
+                    {result.verdictTable && result.verdictTable.map((row, idx) => (
+                      <tr key={idx} className="hover:bg-[#121420]/35 transition-colors">
+                        <td className="p-3 text-xs font-bold text-gray-200">{row.label}</td>
+                        <td className="p-3">
+                          <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider ${
+                            row.isSafe 
+                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
+                              : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                          }`}>
+                            {row.status}
+                          </span>
+                        </td>
+                        <td className="p-3 text-xs text-gray-400 leading-relaxed">{row.value}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
             {/* Tabs for details */}
             <div className="border-b border-[#1f2235] no-print">
               <nav className="flex space-x-4">
@@ -393,7 +450,7 @@ ${result.explanation}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#1f2235]">
-                      {result.securityChecks.map((check, i) => (
+                      {currentSecurityChecks.map((check, i) => (
                         <tr key={i} className="hover:bg-[#121420]/25 transition-colors">
                           <td className="p-3 text-xs text-gray-300 font-semibold">{check.label}</td>
                           <td className="p-3">
@@ -406,17 +463,19 @@ ${result.explanation}
                           <td className="p-3 text-xs text-gray-400">{check.value}</td>
                         </tr>
                       ))}
-                      <tr className="hover:bg-[#121420]/25 transition-colors">
-                        <td className="p-3 text-xs text-gray-300 font-semibold">Registered Age</td>
-                        <td className="p-3">
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            result.domainAge.includes("weeks") || result.domainAge.includes("New") ? "bg-rose-500/10 text-rose-400" : "bg-emerald-500/10 text-emerald-400"
-                          }`}>
-                            {result.domainAge.includes("weeks") || result.domainAge.includes("New") ? "Suspicious" : "Credible"}
-                          </span>
-                        </td>
-                        <td className="p-3 text-xs text-gray-400">{result.domainAge}</td>
-                      </tr>
+                      {!result.signals && (
+                        <tr className="hover:bg-[#121420]/25 transition-colors">
+                          <td className="p-3 text-xs text-gray-300 font-semibold">Registered Age</td>
+                          <td className="p-3">
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                              result.domainAge.includes("weeks") || result.domainAge.includes("New") ? "bg-rose-500/10 text-rose-400" : "bg-emerald-500/10 text-emerald-400"
+                            }`}>
+                              {result.domainAge.includes("weeks") || result.domainAge.includes("New") ? "Suspicious" : "Credible"}
+                            </span>
+                          </td>
+                          <td className="p-3 text-xs text-gray-400">{result.domainAge}</td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -434,7 +493,7 @@ ${result.explanation}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#1f2235]">
-                      {result.companyChecks.map((check, i) => (
+                      {currentCompanyChecks.map((check, i) => (
                         <tr key={i} className="hover:bg-[#121420]/25 transition-colors">
                           <td className="p-3 text-xs text-gray-300 font-semibold">{check.label}</td>
                           <td className="p-3">
@@ -464,7 +523,7 @@ ${result.explanation}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#1f2235]">
-                      {result.reputationChecks.map((check, i) => (
+                      {currentReputationChecks.map((check, i) => (
                         <tr key={i} className="hover:bg-[#121420]/25 transition-colors">
                           <td className="p-3 text-xs text-gray-300 font-semibold">{check.label}</td>
                           <td className="p-3">
@@ -501,7 +560,7 @@ ${result.explanation}
                 className="hover:underline flex items-center gap-0.5 text-blue-500"
               >
                 Inspect WHOIS
-                <ExternalLink className="w-3 h-3" />
+                <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>
           </div>

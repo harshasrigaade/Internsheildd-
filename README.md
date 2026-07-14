@@ -57,6 +57,8 @@ InternShield is a modern, full-stack web application designed to help college st
 3. Click **Load unpacked** (top-left button).
 4. Select the `extension` folder in this repository.
 
+Developed by Gadhey Harsha Sri
+
 ---
 
 ## 👤 Author

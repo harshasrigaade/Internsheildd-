@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gully Cricket Scorer</title>
+    <style>
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-user-select: none; user-select: none;
+        }
+        body {
+            background-color: #121212; color: #ffffff;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; padding: 10px; overflow-x: hidden;
+        }
+        .screen {
+            width: 100%; max-width: 450px; background: #1e1e1e; border-radius: 15px;
+            min-height: 85vh; display: flex; flex-direction: column; padding: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5); position: relative;
+        }
+        .hidden { display: none !important; }
+        .card { display: flex; flex-direction: column; gap: 20px; margin: auto 0; width: 100%; }
+        .text-center { text-align: center; }
+        h2 { color: #4caf50; font-size: 24px; text-align: center; margin-bottom: 5px; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .input-group label { font-size: 14px; color: #b3b3b3; }
+        .input-group input, .input-group select {
+            background: #2a2a2a; border: 2px solid #3a3a3a; padding: 12px;
+            border-radius: 8px; color: #fff; font-size: 16px; outline: none;
+        }
+        .input-group input:focus, .input-group select:focus { border-color: #4caf50; }
+        .main-btn {
+            background: #4caf50; color: #fff; border: none; padding: 14px;
+            font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer;
+            transition: background 0.2s; width: 100%; margin-top: 10px;
+        }
+        .main-btn:active { background: #388e3c; }
+        .disabled-btn { background: #444 !important; color: #888 !important; cursor: not-allowed; }
+        .toss-choices { display: flex; gap: 15px; justify-content: center; margin-top: 10px; }
+        .choice-btn { background: #2a2a2a; border: 2px solid #3a3a3a; color: white; padding: 10px 25px; border-radius: 20px; font-size: 16px; cursor: pointer; }
+        .choice-btn.selected { background: #4caf50; border-color: #fff; }
+        .coin-container { height: 120px; display: flex; justify-content: center; align-items: center; margin: 20px 0; }
+        .coin { font-size: 70px; transition: transform 1s ease-out; display: inline-block; }
+        .toss-result-msg { font-size: 18px; font-weight: bold; color: #ffeb3b; margin: 15px 0; }
+        .scoreboard-container { display: flex; gap: 10px; margin-bottom: 15px; }
+        .team-box { flex: 1; background: #2a2a2a; border: 2px solid #3a3a3a; border-radius: 8px; padding: 10px; text-align: center; }
+        .team-box h3 { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 5px; color: #aaa; }
+        .active-team { border-color: #4caf50; background: #1b3a22; }
+        .active-team h3 { color: #fff; }
+        .score-display { font-size: 22px; font-weight: bold; }
+        .overs-display { font-size: 12px; color: #aaa; }
+        .target-display { font-size: 12px; color: #ffeb3b; margin-top: 3px; font-weight: bold; }
+        
+        .cricket-pitch {
+            background: linear-gradient(to bottom, #2e7d32, #1b5e20, #2e7d32);
+            border: 4px solid #fff; border-radius: 10px; height: 210px; position: relative;
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: 15px 0; box-shadow: inset 0 0 20px rgba(0,0,0,0.4); margin-bottom: 15px;
+        }
+        .crease { width: 85%; height: 2px; background-color: rgba(255, 255, 255, 0.7); margin: 0 auto; }
+        .pitch-assets { display: flex; justify-content: space-between; align-items: center; padding: 0 45px; }
+        .wicket-graphic { color: #fff; font-weight: bold; text-align: center; line-height: 1.2; font-size: 14px; }
+        .equipment-graphic { font-size: 32px; animation: pulseBall 2s infinite alternate; }
+        .pitch-overlay { position: absolute; bottom: 15px; width: 100%; text-align: center; background: rgba(0, 0, 0, 0.6); padding: 5px 0; }
+        #current-ball-status { font-size: 12px; color: #ffeb3b; font-weight: bold; margin-bottom: 4px; }
+        .this-over-balls { display: flex; gap: 5px; justify-content: center; min-height: 20px; }
+        .ball-badge { background: #444; width: 22px; height: 22px; border-radius: 50%; font-size: 11px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .ball-six { background: #9c27b0; color: #fff; }
+        .ball-four { background: #2196f3; color: #fff; }
+        .ball-wicket { background: #f44336; color: #fff; }
+        .ball-extra { background: #ff9800; color: #fff; }
+        
+        .controls-wrapper { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
+        .section-label { font-size: 12px; color: #aaa; font-weight: bold; margin-bottom: 2px; }
+        .circle-buttons-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+        .run-circle { aspect-ratio: 1; border-radius: 50%; border: none; background: #333; color: #fff; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .run-circle:active { background: #555; }
+        .boundaries { background: #ff9800; }
+        .boundaries:active { background: #e65100; }
+        .extra-buttons-row { display: flex; gap: 8px; }
+        .rect-btn { flex: 1; padding: 12px 0; border: none; border-radius: 25px; font-size: 15px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .wicket-btn { background: #f44336; }
+        .wicket-btn:active { background: #b71c1c; }
+        .extra-btn { background: #009688; }
+        .extra-btn:active { background: #004d40; }
+        .dot-btn { background: #555; }
+        .dot-btn:active { background: #222; }
+        .celebration-box { margin: auto; }
+        .big-popper-animation { font-size: 60px; margin-bottom: 20px; }
+        #winner-title { font-size: 32px; color: #ffeb3b; margin-bottom: 10px; }
+        #offline-popper-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; }
+        @keyframes pulseBall { from { transform: scale(1); } to { transform: scale(1.1); } }
+    </style>
+</head>
+<body>
+
+    <!-- SCREEN 1: MATCH SETUP -->
+    <div id="setup-screen" class="screen">
+        <div class="card">
+            <h2>🏏 Gully Cricket Scorer</h2>
+            <p style="text-align: center; color: #aaa; font-size: 14px;">Enter details to start the match</p>
+            <div class="input-group">
+                <label>Team A Name (Batting First)</label>
+                <input type="text" id="teamA" value="Team A">
+            </div>
+            <div class="input-group">
+                <label>Team B Name</label>
+                <input type="text" id="teamB" value="Team B">
+            </div>
+            <div class="input-group">
+                <label>Total Overs</label>
+                <select id="maxOvers">
+                    <option value="1">1 Over</option>
+                    <option value="2" selected>2 Overs</option>
+                    <option value="5">5 Overs</option>
+                    <option value="10">10 Overs</option>
+                </select>
+            </div>
+            <button class="main-btn" onclick="goToTossScreen()">Next to Toss</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: COIN TOSS ANIMATION -->
+    <div id="toss-screen" class="screen hidden">
+        <div class="card text-center">
+            <h2>🪙 The Coin Toss</h2>
+            <p id="toss-instruction">Team A: Choose Heads or Tails</p>
+            <div class="toss-choices" id="toss-choices-container">
+                <button class="choice-btn" onclick="selectTossChoice('Heads')">Heads</button>
+                <button class="choice-btn" onclick="selectTossChoice('Tails')">Tails</button>
+            </div>
+            <div class="coin-container"><div id="coin" class="coin">🪙</div></div>
+            <button id="flip-btn" class="main-btn disabled-btn" onclick="startCoinFlip()" disabled>Tap to Toss</button>
+            <p id="toss-result-text" class="toss-result-msg"></p>
+            <button id="start-match-btn" class="main-btn hidden" onclick="startTheMatch()">Start Match 🏏</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 3: LIVE MATCH INTERFACE -->
+    <div id="match-screen" class="screen hidden">
+        <div class="scoreboard-container">
+            <div class="team-box active-team" id="box-team-a">
+                <h3 id="display-teamA-name">Team A</h3>
+                <div class="score-display"><span id="runs-a">0</span> / <span id="wickets-a">0</span></div>
+                <div class="overs-display">Overs: <span id="overs-a">0.0</span></div>
+            </div>
+            <div class="team-box" id="box-team-b">
+                <h3 id="display-teamB-name">Team B</h3>
+                <div class="score-display"><span id="runs-b">0</span> / <span id="wickets-b">0</span></div>
+                <div class="overs-display">Overs: <span id="overs-b">0.0</span></div>
+                <div class="target-display hidden" id="target-container">Target: <span id="target-score">0</span></div>
+            </div>
+        </div>
+
+        <div class="cricket-pitch">
+            <div class="crease top-crease"></div>
+            <div class="pitch-assets">
+                <div class="wicket-graphic">🪘<br>| | |</div>
+                <div class="equipment-graphic">🏏 🥎</div>
+                <div class="wicket-graphic">| | |<br>🪘</div>
+            </div>
+            <div class="crease bottom-crease"></div>
+            <div class="pitch-overlay">
+                <p id="current-ball-status">Over ongoing...</p>
