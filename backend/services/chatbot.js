@@ -18,6 +18,13 @@ async function handleChat(message, history = [], userApiKey = "") {
 function generateHeuristicChatResponse(message) {
   const msg = message.toLowerCase();
 
+  if (msg.includes("evaluate") || msg.includes("score") || msg.includes("framework") || msg.includes("rubric") || msg.includes("rate") || msg.includes("scale")) {
+    return {
+      text: `📊 **InternShield Internship Evaluation Framework**\n\nWhen verifying an offer, we evaluate it across three core layers out of a **Total Score of 10**:\n\n1. **Company Legitimacy (Weight: 3)**: Active online presence, LinkedIn page, physical address, business registration.\n2. **Website & URL (Weight: 2)**: Professional TLD, HTTPS, DNS registry age, legal pages.\n3. **Offer Letter Quality (Weight: 2)**: Grammar, logo, duration, stipend, signature, address.\n4. **Hiring Process (Weight: 1)**: Proper evaluation stages vs instant hiring.\n5. **Reviews & Reputation (Weight: 1)**: Glassdoor reviews, Reddit discussions.\n6. **No Payment Demands (Weight: 1)**: Absence of training, laptop, or certification fees.\n\n**Score Interpretation:**\n- **9.0–10.0**: Very likely genuine\n- **7.0–8.9**: Probably legitimate\n- **5.0–6.9**: Mixed signals; verify further\n- **3.0–4.9**: High caution\n- **0.0–2.9**: Likely fake or scam\n\n*Action:* Share a website link, company name, or details of your recruitment process, and I will evaluate it for you!`,
+      suggestions: ["Is paying for training normal?", "Recruiter uses a Gmail address"]
+    };
+  }
+
   if (msg.includes("pay") || msg.includes("fee") || msg.includes("deposit") || msg.includes("charge") || msg.includes("money")) {
     return {
       text: `⚠️ **Crucial Security Advisory: Recruitment Payment Requests**\n\nNo genuine company will **ever** request payment from an applicant for processing fees, background checks, laptop setups, or mandatory training materials. \n\n**Common Scam Strategy:** Scammers send a fake check for you to purchase office equipment from a specific "verified vendor" (who is actually the scammer), or they demand a refundable security deposit. \n\n*Action:* Immediately cease communications with this recruiter. Do not send money or banking details.`,
@@ -62,9 +69,9 @@ function generateHeuristicChatResponse(message) {
 
   // Default response
   return {
-    text: `🛡️ **Welcome to the InternShield AI Threat Advisor!**\n\nI can help you analyze job listings, assess recruiter behavior, and point out standard hiring practices. \n\nFeel free to ask me questions like:\n- *"Is it normal to pay for onboarding training?"*\n- *"What are the risks of a WhatsApp recruitment chat?"*\n- *"How do I know if an offer letter is fake?"*\n- *"Is this data-entry job a scam?"*`,
+    text: `🛡️ **Welcome to the InternShield AI Threat Advisor!**\n\nI can help you evaluate internship offers, website links, or company names using our three-layer score card out of 10. \n\nFeel free to ask me questions like:\n- *"How do I evaluate this company?"*\n- *"What are the risks of a WhatsApp recruitment chat?"*\n- *"How do I know if an offer letter is fake?"*\n- *"Is this data-entry job a scam?"*`,
     suggestions: [
-      "Is paying for training normal?",
+      "Explain the evaluation framework",
       "Recruiter uses a Gmail address",
       "I was hired without an interview"
     ]
@@ -90,7 +97,23 @@ async function runGeminiChat(message, history, apiKey) {
   You are the "InternShield AI Safety Advisor", a chatbot integrated into a job scam detection web app.
   Your goal is to answer queries from students, freshers, and job seekers who are worried about recruitment scams, fake certificates, phishing, and advance-fee schemes.
   
-  Format your reply using professional, comforting, and clear Markdown (bullet points, bold text). Highlight key warning signs with emojis (like ⚠️, 📱, 📄). Keep responses concise (under 250 words) and directly actionable.
+  When the user shares a company name, website link, or details of their internship offer, you MUST apply this exact Suggested Scoring Model (Out of 10):
+  - Company legitimacy (weight 3): active presence, LinkedIn page, employees online, physical address, business registration.
+  - Website and URL trustworthiness (weight 2): professional TLD vs suspicious TLDs, HTTPS, contact/privacy pages.
+  - Offer letter quality (weight 2): grammar mistakes, address, manager name, company email, signature.
+  - Hiring process authenticity (weight 1): screening/interview vs instant selection/offer.
+  - Employee reviews and reputation (weight 1): Glassdoor/Reddit recruitment discussions.
+  - No suspicious payment requests (weight 1): demands for training fees, security deposits, laptop fees.
+  - Total: 10
+  
+  Interpretation Scale:
+  - 9.0–10.0: Very likely genuine
+  - 7.0–8.9: Probably legitimate
+  - 5.0–6.9: Mixed signals; verify further
+  - 3.0–4.9: High caution
+  - 0.0–2.9: Likely fake or scam
+  
+  Format your reply using professional, comforting, and clear Markdown (bullet points, bold text). When evaluating, explicitly list the score out of 10 for each category, compute the total score, and explain your safety interpretation. Highlight warning signs with emojis (like ⚠️, 📱, 📄). Keep responses under 250 words and directly actionable.
   
   Suggest 2 short follow-up questions at the very end of your response inside a JSON block format starting with [SUGGESTIONS] so the system can parse them. Example:
   [SUGGESTIONS] ["What is an advance fee scam?", "How do I verify a LinkedIn page?"]
