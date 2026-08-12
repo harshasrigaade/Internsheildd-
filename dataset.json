@@ -1,0 +1,44 @@
+{
+  "data": [
+    {
+      "text": "Company: Google | Domain: google.com | Contact: careers@google.com | Text: Software Engineering Intern 2026. Official Google portal application only.",
+      "label": 0
+    },
+    {
+      "text": "Company: TCS | Domain: tcs.com | Contact: campus@tcs.com | Text: Graduate Trainee Analyst. No registration fee.",
+      "label": 0
+    },
+    {
+      "text": "Company: Deloitte | Domain: deloitte.com | Contact: india_careers@deloitte.com | Text: Risk Advisory Intern. Conduct financial risk audits.",
+      "label": 0
+    },
+    {
+      "text": "Company: Microsoft | Domain: microsoft.com | Contact: jobs@microsoft.com | Text: Data Science Intern. Apply on official portal.",
+      "label": 0
+    },
+    {
+      "text": "Company: Infosys | Domain: infosys.com | Contact: recruitment@infosys.com | Text: Systems Engineer Intern. Paid stipend.",
+      "label": 0
+    },
+    {
+      "text": "Company: Unknown | Domain: zenith-typing.online | Contact: hr@gmail.com | Text: Typing job 50000 INR/month. Pay 999 INR registration fee.",
+      "label": 1
+    },
+    {
+      "text": "Company: Microsoft Fake | Domain: forms.gle/fake123 | Contact: Telegram @scam | Text: Pay 499 INR for certificate processing.",
+      "label": 1
+    },
+    {
+      "text": "Company: Amazon Fake | Domain: amazon-hiring-india.free.site | Contact: amazon_recruiter@yahoo.com | Text: Send 2500 INR security deposit for laptop courier.",
+      "label": 1
+    },
+    {
+      "text": "Company: Global Apex | Domain: apex-careers.site | Contact: WhatsApp +91-9876543210 | Text: Home-based Data Entry Job. Pay 1500 INR for software key.",
+      "label": 1
+    },
+    {
+      "text": "Company: EduCert Trainee | Domain: educert-skills.ml | Contact: info@educert.ml | Text: Unpaid Business Internship. Must buy 2000 INR course.",
+      "label": 1
+    }
+  ]
+}

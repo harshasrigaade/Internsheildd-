@@ -17,6 +17,14 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.json({
+    status: "online",
+    name: "InternShield API Backend",
+    model: "DistilBERT ML Spam Detection Active 🛡️"
+  });
+});
+
 // Set up file upload destination
 const uploadDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadDir)) {
